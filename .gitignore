@@ -1,0 +1,5 @@
+#folder yang ga di commit
+env
+__pycache__
+#file yg ga ikut
+.env
