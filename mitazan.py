@@ -61,7 +61,7 @@ def location(bot, update):
     #jadwal = getImsakiyah(bot,update,tgl)
     #setAlarmImsakiyah 
     '''alarm imsakiyah akan atur imsakiyah hari ini dengan waktu yang terdekat'''
-    jadwal = setImsakiyahReminder(mylokasi,offset)
+    jadwal = getImsakiyah(mylokasi,offset)
     jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
 
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
@@ -93,7 +93,7 @@ def error(bot, update, error):
 #def ImsakiyahReminder(bot,job):
 
 
-def setImsakiyahReminder(loc,off_set):
+def getImsakiyah(loc,off_set):
     tgl =datetime.now()
     waktu = tgl.replace(second=0,microsecond=0)
     waktu = waktu.time()
