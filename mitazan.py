@@ -13,16 +13,18 @@ from  praytimes import PrayTimes
 tf = TimezoneFinder()
 prayTimes = PrayTimes('Makkah')
 #geolocator
-#geolocator = Nominatim(user_agent="mitazan")
+geolocator = Nominatim(user_agent="mitazan")
 load_dotenv(find_dotenv())
 telegram_token = getenv('TELEGRAM_TOKEN')
+
+
 
 #enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-LOCATION,JADWAL = range(2)
-location_keyboard = KeyboardButton(text="Atur Lokasi",  request_location=True)
+LOCATION,JADWAL,LOKASIMU = range(3)
+location_keyboard = KeyboardButton(text="Lokasi by GPS",  request_location=True)
 
 def getOffset(target):
     utc = pytz.utc
@@ -33,17 +35,29 @@ def getOffset(target):
     return (today_utc - today_target).total_seconds()/3600
 
 def getLokasi(loc):
-    geolocator=Nominatim(user_agent='mitazan')
+    #geolocator=Nominatim(user_agent='mitazan')
     location = geolocator.reverse(loc)
     return location.address
+
+def getAlamat(text):
+    location = geolocator.geocode(text)
+    return (location.latitude,location.longitude)
+
 def getImsakiyah(bot,update,date):
     return 'imsakiyah hari ini {}'.format(date)
 
 def start(bot,update):
-    reply_keyboard = [[location_keyboard]]
+    reply_keyboard = [[location_keyboard],["Alamat"]]
     update.message.reply_text(
       'Hi! kenalin ni MIT bot.\n'
-      'Setting imsakiyah. \n',
+      'Saat ini bot hanya support jadwal imsakiyah. \n'
+      'Untuk Penggunaan cukup pilih tombol aja \n'
+      'Lokasi by GPS akan mencari alamat berdasar GPS.\n'
+      'Alamat adalah untuk input manual alamat anda \n'
+      'Perintah yang ada saat ini adalah : \n '
+      '/start untuk memulai aplikasi \n'
+      '/cancel untuk selesai \n'
+      'untuk perintah setting dan notifikasi belum ada',
       reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
     return LOCATION
 
@@ -72,10 +86,29 @@ def location(bot, update):
 
     return ConversationHandler.END
 
+def setlokasi(bot,update):
+    update.message.reply_text('Ketikan alamatmu, '
+                              'misal : jakarta')
+    return LOKASIMU
+
+def getLokasimu(bot,update):
+    alamat = update.message.text
+    mylokasi= getAlamat(alamat) #(user_location.latitude,user_location.longitude)
+    latlong = dict({'lat':mylokasi[0],'lng':mylokasi[1]})
+    lokasi = getLokasi(mylokasi)
+    offset = getOffset(latlong)
+    jadwal = getImsakiyah(mylokasi,offset)
+    jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
+    update.message.reply_text("Imsakiyah di alamatmu \n"
+                              "{}".format(jadwal))
+    return ConversationHandler.END
+
+
+
 def cancel(bot, update):
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
-    update.message.reply_text('Bye! I hope we can talk again some day.',
+    update.message.reply_text('Bye!',
                               reply_markup=ReplyKeyboardRemove())
 
     return ConversationHandler.END
@@ -116,7 +149,8 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            LOCATION: [MessageHandler(Filters.location, location)],
+            LOCATION: [MessageHandler(Filters.location, location),RegexHandler('^(Alamat)$',setlokasi),CommandHandler('alamat',setlokasi),],
+            LOKASIMU: [MessageHandler(Filters.text,getLokasimu),]
 
         },
 
