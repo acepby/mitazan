@@ -154,14 +154,14 @@ class PrayTimes():
 
 	def setMethod(self, method):
 		if method in self.methods:
-			self.adjust(self.methods[method].params)
+			self.adjust(self.methods[method]['params'])
 			self.calcMethod = method
 
 	def adjust(self, params):
 		self.settings.update(params)
 
 	def tune(self, timeOffsets):
-		self.offsets.update(timeOffsets)
+		self.offset.update(timeOffsets)
 
 	def getMethod(self):
 		return self.calcMethod
@@ -419,15 +419,18 @@ class PrayTimes():
 #---------------------- prayTimes Object -----------------------
 
 prayTimes = PrayTimes()
-
+#prayTimes.setMethod('Karachi')
 
 #-------------------------- Test Code --------------------------
 
 # sample code to run in standalone mode only
 if __name__ == "__main__":
 	from datetime import date
-	print('Prayer Times for today in Waterloo/Canada\n'+ ('='* 41))
-	loc = (43, -80)
-	times = prayTimes.getTimes(date.today(), loc, -5.0);
+	print('Prayer Times for today in Yogyakarta\n'+ ('='* 41))
+	prayTimes.setMethod("Karachi")
+	print(prayTimes.getSettings())
+	print(prayTimes.getMethod())
+	loc = (-7.7955798, 110.3694896)
+	times = prayTimes.getTimes(date.today(), loc, 7.0);
 	for i in ['Imsak','Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']:
 		print(i+ ': '+ times[i.lower()])

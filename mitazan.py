@@ -11,7 +11,8 @@ from datetime import date,datetime,time,timedelta
 from  praytimes import PrayTimes
 
 tf = TimezoneFinder()
-prayTimes = PrayTimes('Makkah')
+prayTimes = PrayTimes()
+prayTimes.setMethod('Karachi')
 #geolocator
 geolocator = Nominatim(user_agent="mitazan")
 load_dotenv(find_dotenv())
@@ -76,7 +77,8 @@ def location(bot, update):
     #setAlarmImsakiyah 
     '''alarm imsakiyah akan atur imsakiyah hari ini dengan waktu yang terdekat'''
     jadwal = getImsakiyah(mylokasi,offset)
-    jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
+    #jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
+    jadwal = formatJadwal(jadwal)
 
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
@@ -98,11 +100,15 @@ def getLokasimu(bot,update):
     lokasi = getLokasi(mylokasi)
     offset = getOffset(latlong)
     jadwal = getImsakiyah(mylokasi,offset)
-    jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
+    #jadwal = ', '.join("{!s}={!r}".format(key,val) for (key,val) in jadwal.items())
+    jadwal = formatJadwal(jadwal)
     update.message.reply_text("Imsakiyah di alamatmu \n"
                               "{}".format(jadwal))
     return ConversationHandler.END
 
+def formatJadwal(jadwal):
+    formated = '\n'.join("{} : {}".format(key,val) for key,val in sorted(jadwal.items(), key=lambda p:p[1]))
+    return formated
 
 
 def cancel(bot, update):
