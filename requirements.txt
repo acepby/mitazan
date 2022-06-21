@@ -6,7 +6,7 @@ future==0.17.1
 geographiclib==1.49
 geopy==1.19.0
 importlib-resources==1.0.2
-numpy==1.16.3
+numpy==1.22.0
 pycparser==2.19
 python-dotenv==0.10.2
 python-telegram-bot==11.1.0
